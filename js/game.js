@@ -3,12 +3,17 @@ let canvas, ctx, paddle, falling, W, H, spawnInterval, isDragging = false, dragO
 let gameStarted = false, gamePaused = false;
 let getCurrentInput = () => "username";
 
+// Giúp responsive paddle & chữ
+function isMobile() {
+    return window.innerWidth <= 600;
+}
+
 export function initGame(getInputCallback) {
     canvas = document.getElementById('game');
     ctx = canvas.getContext('2d');
     W = window.innerWidth; H = window.innerHeight;
     canvas.width = W; canvas.height = H;
-    paddle = { width: 190, height: 30, x: W / 2 - 95, y: H - 90, speed: 14, dx: 0 };
+    initPaddle();
     falling = [];
     getCurrentInput = getInputCallback;
 
@@ -16,6 +21,17 @@ export function initGame(getInputCallback) {
     spawnInterval = setInterval(spawnLetters, 950);
     setupDrag();
     setupKey();
+}
+
+function initPaddle() {
+    paddle = {
+        width: isMobile() ? 110 : 190,
+        height: isMobile() ? 18 : 30,
+        x: W / 2 - (isMobile() ? 55 : 95),
+        y: H - 90,
+        speed: isMobile() ? 9 : 14,
+        dx: 0
+    };
 }
 
 export function setGameState(started, paused) {
@@ -34,7 +50,7 @@ export function drawGame() {
     for (let i = falling.length - 1; i >= 0; i--) {
         let f = falling[i];
         ctx.save();
-        ctx.font = 'bold 38px Segoe UI, Arial';
+        ctx.font = 'bold ' + (isMobile() ? '24px' : '38px') + ' Segoe UI, Arial';
         ctx.shadowColor = '#71b7ff';
         ctx.shadowBlur = 14;
         ctx.fillStyle = '#fff';
@@ -45,10 +61,10 @@ export function drawGame() {
         // Chỉ nhận chữ khi đang chơi và không pause!
         if (
             gameStarted && !gamePaused &&
-            f.y + 22 > paddle.y &&
+            f.y + (isMobile() ? 16 : 22) > paddle.y &&
             f.x > paddle.x &&
             f.x < paddle.x + paddle.width &&
-            f.y < paddle.y + paddle.height + 32
+            f.y < paddle.y + paddle.height + (isMobile() ? 18 : 32)
         ) {
             const inputId = getCurrentInput();
             const inputElem = document.getElementById(inputId);
@@ -71,25 +87,27 @@ export function drawGame() {
 
 function drawPaddle() {
     ctx.save();
-    ctx.shadowColor = "#e63946bb"; ctx.shadowBlur = 18;
+    ctx.shadowColor = "#e63946bb"; ctx.shadowBlur = isMobile() ? 9 : 18;
     ctx.fillStyle = "#fff";
+    const radius = isMobile() ? 10 : 18;
     ctx.beginPath();
-    ctx.moveTo(paddle.x + 18, paddle.y);
-    ctx.lineTo(paddle.x + paddle.width - 18, paddle.y);
-    ctx.quadraticCurveTo(paddle.x + paddle.width, paddle.y, paddle.x + paddle.width, paddle.y + 18);
-    ctx.lineTo(paddle.x + paddle.width, paddle.y + paddle.height - 18);
-    ctx.quadraticCurveTo(paddle.x + paddle.width, paddle.y + paddle.height, paddle.x + paddle.width - 18, paddle.y + paddle.height);
-    ctx.lineTo(paddle.x + 18, paddle.y + paddle.height);
-    ctx.quadraticCurveTo(paddle.x, paddle.y + paddle.height, paddle.x, paddle.y + paddle.height - 18);
-    ctx.lineTo(paddle.x, paddle.y + 18);
-    ctx.quadraticCurveTo(paddle.x, paddle.y, paddle.x + 18, paddle.y);
+    ctx.moveTo(paddle.x + radius, paddle.y);
+    ctx.lineTo(paddle.x + paddle.width - radius, paddle.y);
+    ctx.quadraticCurveTo(paddle.x + paddle.width, paddle.y, paddle.x + paddle.width, paddle.y + radius);
+    ctx.lineTo(paddle.x + paddle.width, paddle.y + paddle.height - radius);
+    ctx.quadraticCurveTo(paddle.x + paddle.width, paddle.y + paddle.height, paddle.x + paddle.width - radius, paddle.y + paddle.height);
+    ctx.lineTo(paddle.x + radius, paddle.y + paddle.height);
+    ctx.quadraticCurveTo(paddle.x, paddle.y + paddle.height, paddle.x, paddle.y + paddle.height - radius);
+    ctx.lineTo(paddle.x, paddle.y + radius);
+    ctx.quadraticCurveTo(paddle.x, paddle.y, paddle.x + radius, paddle.y);
     ctx.closePath(); ctx.fill(); ctx.restore();
     let grad = ctx.createLinearGradient(paddle.x, paddle.y, paddle.x + paddle.width, paddle.y + paddle.height);
     grad.addColorStop(0, '#e63946'); grad.addColorStop(1, '#e85890');
     ctx.fillStyle = grad;
-    ctx.fillRect(paddle.x + 9, paddle.y + 9, paddle.width - 18, paddle.height - 18);
-    ctx.font = '16px Segoe UI, Arial'; ctx.fillStyle = '#fff'; ctx.textAlign = 'center';
-    ctx.fillText('← Bắt chữ →', paddle.x + paddle.width / 2, paddle.y + paddle.height - 8);
+    ctx.fillRect(paddle.x + radius / 2, paddle.y + radius / 2, paddle.width - radius, paddle.height - radius);
+    ctx.font = (isMobile() ? '12px' : '16px') + ' Segoe UI, Arial';
+    ctx.fillStyle = '#fff'; ctx.textAlign = 'center';
+    ctx.fillText('← Bắt chữ →', paddle.x + paddle.width / 2, paddle.y + paddle.height - (isMobile() ? 4 : 8));
 }
 
 function randomLetter() {
@@ -110,6 +128,16 @@ function resize() {
     W = window.innerWidth; H = window.innerHeight;
     canvas.width = W; canvas.height = H;
     paddle.y = H - 90;
+    // Cập nhật kích thước paddle khi đổi cỡ
+    if (isMobile()) {
+        paddle.width = 110;
+        paddle.height = 18;
+        if (paddle.x + paddle.width > W) paddle.x = W - paddle.width;
+    } else {
+        paddle.width = 190;
+        paddle.height = 30;
+        if (paddle.x + paddle.width > W) paddle.x = W - paddle.width;
+    }
 }
 function setupKey() {
     document.addEventListener('keydown', (e) => {
