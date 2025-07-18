@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Login Game: Catch the Letters!</title>
+  <link rel="stylesheet" href="./css/login-game.css" />
+</head>
+
+<body>
+  <div id="particles-js" style="position:fixed;width:100vw;height:100vh;left:0;top:0;z-index:0;"></div>
+
+  <img src="https://consortio.vn/wp-content/uploads/sites/216/2025/01/logo-trang.png" class="logo" id="logo-bounce" />
+  <button id="btnPlay" class="btn-play">▶ Play</button>
+  <button id="btnPause" class="btn-play" style="display:none;">⏸ Pause</button>
+
+
+  <canvas id="game" class="game-canvas"></canvas>
+  <div class="login-container">
+    <h2>Login</h2>
+    <form onsubmit="return false;">
+      <input id="username" type="text" placeholder="Username" autocomplete="off" required />
+      <input id="password" type="password" placeholder="Password" required />
+      <button type="submit">Login</button>
+      <div class="guide-text">
+        Dùng phím <b>← →</b> để di chuyển thanh ngang và bắt lấy chữ cái!
+      </div>
+    </form>
+  </div>
+  <script src="./particles.min.js"></script>
+  <script type="module" src="./js/main.js"></script>
+</body>
+
+</html>
